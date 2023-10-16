@@ -4,6 +4,8 @@ In the prior step, you [generated the user-facing TLS certificate](./02-ca-certi
 
 ## Expected results
 
+
+
 Following the steps below you will result in an Azure AD configuration that will be used for Kubernetes control plane (Cluster API) authorization.
 
 | Object                             | Purpose                                                 |
