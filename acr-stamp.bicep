@@ -4,7 +4,7 @@ targetScope = 'resourceGroup'
 
 @description('The regional network spoke VNet Resource ID that the cluster will be joined to.')
 @minLength(79)
-param targetVnetResourceId string
+param targetVnetResourceId string = '/subscriptions/5c09efad-987e-4392-b86b-e27fddefe153/resourceGroups/rg-enterprise-networking-spokes/providers/Microsoft.Network/virtualNetworks/vnet-spoke-BU0001A0008-00'
 
 @allowed([
   'australiaeast'
@@ -61,7 +61,8 @@ var subRgUniqueString = uniqueString('aks', subscription().subscriptionId, resou
 
 resource spokeResourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' existing = {
   scope: subscription()
-  name: split(targetVnetResourceId,'/')[4]
+  name: 'rg-enterprise-networking-spokes'
+  /*** split(targetVnetResourceId,'/')[4] ***/
 }
 
 resource spokeVirtualNetwork 'Microsoft.Network/virtualNetworks@2022-09-01' existing = {
