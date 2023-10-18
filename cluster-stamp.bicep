@@ -4,16 +4,16 @@ targetScope = 'resourceGroup'
 
 @description('The regional network spoke VNet Resource ID that the cluster will be joined to')
 @minLength(79)
-param targetVnetResourceId string
+param targetVnetResourceId string = '/subscriptions/5c09efad-987e-4392-b86b-e27fddefe153/resourceGroups/rg-enterprise-networking-spokes/providers/Microsoft.Network/virtualNetworks/vnet-spoke-BU0001A0008-00'
 
 @description('Azure AD Group in the identified tenant that will be granted the highly privileged cluster-admin role. If Azure RBAC is used, then this group will get a role assignment to Azure RBAC, else it will be assigned directly to the cluster\'s admin group.')
-param clusterAdminAadGroupObjectId string
+param clusterAdminAadGroupObjectId string = '36ea33e0-0b34-4fcd-b135-5ffe39813210'
 
 @description('Azure AD Group in the identified tenant that will be granted the read only privileges in the a0008 namespace that exists in the cluster. This is only used when Azure RBAC is used for Kubernetes RBAC.')
-param a0008NamespaceReaderAadGroupObjectId string
+param a0008NamespaceReaderAadGroupObjectId string = '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
 
 @description('Your AKS control plane Cluster API authentication tenant')
-param k8sControlPlaneAuthorizationTenantId string
+param k8sControlPlaneAuthorizationTenantId string 
 
 @description('The certificate data for app gateway TLS termination. It is base64')
 param appGatewayListenerCertificate string
@@ -130,7 +130,8 @@ resource nodeResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' exist
   scope: subscription()
 }
 
-// Built-in Azure RBAC role that is applied to a cluster to indicate they can be considered a user/group of the cluster, subject to additional RBAC permissions
+// Built-in Azure RBAC role that is applied to a cluster to indicate they can be considered a user/group of the cluster,
+// subject to additional RBAC permissions
 resource serviceClusterUserRole 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
   name: '4abbcc35-e782-43d8-92c5-2d3f1bd2253f'
   scope: subscription()
@@ -191,10 +192,11 @@ resource la 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' existi
   name: 'la-${clusterName}'
 }
 
-// Kubernetes namespace: a0008 -- this doesn't technically exist prior to deployment, but is required as a resource reference later in the template
+// Kubernetes namespace: a0008 -- this doesn't technically exist prior to deployment, 
+//but is required as a resource reference later in the template
 // to support Azure RBAC-managed API Server access, scoped to the namespace level.
-#disable-next-line BCP081 // this namespaces child type doesn't have a defined bicep type yet.
-resource nsA0008 'Microsoft.ContainerService/managedClusters/namespaces@2022-01-02-preview' existing = {
+// #disable-next-line BCP081 // this namespaces child type doesn't have a defined bicep type yet.
+resource nsA0008 'Microsoft.ContainerService/managedClusters/namespaces@2023-07-02-preview' existing = {
   parent: mc
   name: 'a0008'
 }
@@ -204,7 +206,8 @@ resource nsA0008 'Microsoft.ContainerService/managedClusters/namespaces@2022-01-
 // Spoke resource group
 resource targetResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   scope: subscription()
-  name: split(targetVnetResourceId, '/')[4]
+  name: 'rg-enterprise-networking-spokes'
+  // split(targetVnetResourceId, '/')[4]
 }
 
 // Spoke virtual network
@@ -1008,8 +1011,8 @@ resource paAKSLinuxRestrictive 'Microsoft.Authorization/policyAssignments@2021-0
   }
 }
 
-// Applying the built-in 'Kubernetes clusters should be accessible only over HTTPS' policy at the resource group level.
-// Constraint Name: K8sAzureIngressHttpsOnly
+// // Applying the built-in 'Kubernetes clusters should be accessible only over HTTPS' policy at the resource group level.
+// // Constraint Name: K8sAzureIngressHttpsOnly
 resource paEnforceHttpsIngress 'Microsoft.Authorization/policyAssignments@2021-06-01' = {
   name: guid(pdEnforceHttpsIngressId, resourceGroup().id, clusterName)
   location: 'global'
@@ -1428,7 +1431,7 @@ resource paK8sIngressTlsHostsHaveSpecificDomainSuffix 'Microsoft.Authorization/p
   }
 }
 
-// The control plane identity used by the cluster. Used for networking access (VNET joining and DNS updating)
+// // The control plane identity used by the cluster. Used for networking access (VNET joining and DNS updating)
 resource miClusterControlPlane 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = {
   name: 'mi-${clusterName}-controlplane'
   location: location

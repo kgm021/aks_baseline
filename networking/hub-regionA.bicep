@@ -330,7 +330,7 @@ resource vnetHub_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-
   }
 }
 
-// Allocate three IP addresses to the firewall
+// // Allocate three IP addresses to the firewall
 var numFirewallIpAddressesToAssign = 3
 resource pipsAzureFirewall 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for i in range(0, numFirewallIpAddressesToAssign): {
   name: 'pip-fw-${location}-${padLeft(i, 2, '0')}'
@@ -731,6 +731,6 @@ resource hubFirewall_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2
   }
 }
 
-/*** OUTPUTS ***/
+// /*** OUTPUTS ***/
 
 output hubVnetId string = vnetHub.id
